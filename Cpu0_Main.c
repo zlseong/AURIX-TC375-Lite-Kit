@@ -24,20 +24,56 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
  * IN THE SOFTWARE.
  *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * Step 1.1: Minimal Boot & LED Blink
+ * - Initialize Port P00.5 as OUTPUT (LED1)
+ * - Blink LED every 500ms
+ * - Use STM0 for delay
+ *********************************************************************************************************************/
+
 #include "Ifx_Types.h"
 #include "IfxCpu.h"
 #include "IfxScuWdt.h"
 #include "Ifx_Cfg_Ssw.h"
+#include "IfxPort.h"              /* Port driver for GPIO */
+#include "IfxStm.h"               /* System Timer Module for delay */
 
 IFX_ALIGN(4) IfxCpu_syncEvent cpuSyncEvent = 0;
 
+/******************************************************************************/
+/*                           Hardware Configuration                           */
+/******************************************************************************/
+/* LED Configuration (TC375 Lite Kit)
+ * - LED1: P00.5, LED2: P00.6
+ * - Active LOW (0 = ON, 1 = OFF)
+ * - If LEDs don't work, check schematic and change polarity
+ */
+#define LED1_PORT       &MODULE_P00
+#define LED1_PIN        5
+#define LED2_PORT       &MODULE_P00
+#define LED2_PIN        6
+
+/* LED States */
+#define LED_ON          0         /* Active LOW: 0 = LED ON */
+#define LED_OFF         1         /* Active LOW: 1 = LED OFF */
+
+/* Timing Configuration */
+#define DELAY_500MS     500000u   /* 500ms in microseconds */
+
+/******************************************************************************/
+/*                           Function Prototypes                              */
+/******************************************************************************/
+static void delay_us(uint32 microseconds);
+static void initLED(void);
+
+/******************************************************************************/
+/*                           Main Function                                    */
+/******************************************************************************/
 void core0_main(void)
 {
     IfxCpu_enableInterrupts();
     
-    /* !!WATCHDOG0 AND SAFETY WATCHDOG ARE DISABLED HERE!!
-     * Enable the watchdogs and service them periodically if it is required
-     */
+    /* Disable Watchdogs */
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
     IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
     
@@ -45,8 +81,84 @@ void core0_main(void)
     IfxCpu_emitEvent(&cpuSyncEvent);
     IfxCpu_waitEvent(&cpuSyncEvent, 1);
     
+    /* Initialize LED GPIO */
+    initLED();
     
+    /* Main Loop: LED1 ↔ LED2 Alternating Blink
+     * Pattern: LED1 ON + LED2 OFF → LED1 OFF + LED2 ON
+     */
     while(1)
     {
+        /* State 1: LED1 ON, LED2 OFF */
+        IfxPort_setPinLow(LED1_PORT, LED1_PIN);    // LED1 = ON (Active LOW)
+        IfxPort_setPinHigh(LED2_PORT, LED2_PIN);   // LED2 = OFF
+        delay_us(DELAY_500MS);
+        
+        /* State 2: LED1 OFF, LED2 ON */
+        IfxPort_setPinHigh(LED1_PORT, LED1_PIN);   // LED1 = OFF
+        IfxPort_setPinLow(LED2_PORT, LED2_PIN);    // LED2 = ON (Active LOW)
+        delay_us(DELAY_500MS);
+    }
+}
+
+/******************************************************************************/
+/*                           Function Definitions                             */
+/******************************************************************************/
+
+/**
+ * \brief Initialize LED GPIO as output
+ * 
+ * Configures P00.5 (LED1) and P00.6 (LED2) as push-pull outputs
+ * Initial state: LED1 OFF, LED2 OFF
+ */
+static void initLED(void)
+{
+    /* Configure P00.5 (LED1) as OUTPUT, PUSH-PULL mode */
+    IfxPort_setPinMode(LED1_PORT, LED1_PIN, IfxPort_Mode_outputPushPullGeneral);
+    
+    /* Configure P00.6 (LED2) as OUTPUT, PUSH-PULL mode */
+    IfxPort_setPinMode(LED2_PORT, LED2_PIN, IfxPort_Mode_outputPushPullGeneral);
+    
+    /* Set initial state: Both LEDs OFF (Active LOW: HIGH = OFF) */
+    IfxPort_setPinHigh(LED1_PORT, LED1_PIN);
+    IfxPort_setPinHigh(LED2_PORT, LED2_PIN);
+}
+
+/**
+ * \brief Microsecond delay using STM0
+ * 
+ * \param microseconds Delay time in microseconds (us)
+ * 
+ * This function uses the System Timer Module (STM0) to create
+ * accurate delays. STM0 runs at system frequency (typically 100MHz).
+ * 
+ * Note: This is a blocking delay. In RTOS environments, use vTaskDelay() instead.
+ */
+static void delay_us(uint32 microseconds)
+{
+    /* Get current STM0 timer value (lower 32-bit of 64-bit counter)
+     * Note: Explicit cast to uint32 to suppress W560 truncation warning
+     *       We intentionally use only lower 32-bit for wraparound-safe timing
+     */
+    uint32 startTime = (uint32)IfxStm_get(&MODULE_STM0);
+    
+    /* Calculate required ticks for the delay
+     * IfxStm_getTicksFromMicroseconds() returns sint32
+     * TC375 typically runs STM at 100MHz: 1us = 100 ticks
+     */
+    sint32 delayTicks = IfxStm_getTicksFromMicroseconds(&MODULE_STM0, microseconds);
+    
+    /* Handle negative or zero delay */
+    if(delayTicks <= 0)
+    {
+        return;
+    }
+    
+    /* Wait until the required time has elapsed
+     * Note: 32-bit wraparound is handled by unsigned arithmetic
+     */
+    while(((uint32)IfxStm_get(&MODULE_STM0) - startTime) < (uint32)delayTicks)
+    {
+        /* Busy wait - CPU is blocked during this time */
     }
 }
