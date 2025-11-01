@@ -1,0 +1,183 @@
+# ==============================================================================
+# TC375 Zonal Gateway - Git Ignore Configuration
+# ==============================================================================
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Prompt and Temporary Files
+# ──────────────────────────────────────────────────────────────────────────────
+PROMPT.md
+*.prompt.md
+**/PROMPT_*.md
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Downloaded Dependencies (Large Files - Regenerate with script)
+# ──────────────────────────────────────────────────────────────────────────────
+
+# lwIP source code (downloaded via download_dependencies.ps1)
+lwip/lwip-2.1.3/
+
+# FreeRTOS source code (downloaded via download_dependencies.ps1)
+FreeRTOS/FreeRTOS-Kernel/
+
+# Note: Keep our custom port files:
+# - lwip/port/ (custom integration)
+# - lwip/README.md
+# - FreeRTOS/FreeRTOSConfig.h
+# - FreeRTOS/README.md
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Build Output (AURIX Development Studio)
+# ──────────────────────────────────────────────────────────────────────────────
+
+# TASKING Compiler Output
+TriCore Debug (TASKING)/
+TriCore Release (TASKING)/
+
+# GCC Compiler Output
+TriCore Debug (GCC)/
+TriCore Release (GCC)/
+
+# Generic Build Output
+Debug/
+Release/
+Build/
+Output/
+
+# Object Files
+*.o
+*.obj
+*.elf
+*.axf
+
+# Hex/Binary Files
+*.hex
+*.bin
+*.out
+*.a
+
+# Map Files
+*.map
+
+# Dependency Files
+*.d
+*.dep
+
+# Listing Files
+*.lst
+*.lss
+
+# ──────────────────────────────────────────────────────────────────────────────
+# IDE-Specific Files (Eclipse/AURIX Development Studio)
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Eclipse Project Files (keep .project and .cproject for team sharing)
+.metadata/
+.recommenders/
+RemoteSystemsTempFiles/
+
+# Eclipse Settings (some can be team-shared)
+.settings/org.eclipse.cdt.core.prefs
+.settings/org.eclipse.cdt.managedbuilder.core.prefs
+
+# Launch Configurations (can be useful to keep some)
+*.launch
+
+# CDT Indexer
+.cproject.backup
+.project.backup
+.indexer/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# OS-Specific Files
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Temporary and Cache Files
+# ──────────────────────────────────────────────────────────────────────────────
+
+# General Temp Files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Backup Files
+*.bak
+*.backup
+*.old
+
+# Log Files
+*.log
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Version Control
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Git
+.git/
+*.orig
+
+# SVN
+.svn/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Documentation Build Output
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Doxygen Output (if generated)
+docs/html/
+docs/latex/
+docs/xml/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Debugger-Specific Files
+# ──────────────────────────────────────────────────────────────────────────────
+
+# UDE (Universal Debug Engine)
+*.udd
+
+# Lauterbach TRACE32
+*.cmm.bak
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Optional: Keep These for Team Development
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Uncomment if you want to exclude Eclipse project files
+# .project
+# .cproject
+
+# Uncomment if you want to exclude all settings
+# .settings/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Notes
+# ──────────────────────────────────────────────────────────────────────────────
+
+# To regenerate dependencies:
+# 1. Run: powershell -ExecutionPolicy Bypass -File .\download_dependencies.ps1
+# 2. This will download lwIP and FreeRTOS automatically
+
+# Repository Size Optimization:
+# - lwIP: ~8 MB (excluded)
+# - FreeRTOS: ~5 MB (excluded)
+# - Build outputs: Variable (excluded)
+# - Total saved: ~20-50 MB per clone
+
