@@ -944,6 +944,10 @@ typedef struct {
 
 ### Day 4: OTA + 통합
 **오전 (4시간)**
+- [ ] **MIKROE-3191 (Flash Click) 통합** ⭐ NEW!
+  - QSPI2 드라이버 초기화
+  - W25Q128JV SPI Flash 테스트 (16MB)
+  - Zone Package 다운로드 버퍼 구현
 - [ ] OTA Manager 구현
   - UDS 0x34 (RequestDownload)
   - UDS 0x36 (TransferData)
@@ -955,8 +959,10 @@ typedef struct {
 **오후 (4시간)**
 - [ ] End-to-End OTA 테스트
   ```
-  VMG → ZG: OTA Package
-  ZG: Download to Bank B
+  VMG → ZG: OTA Package (zone.bin 10MB)
+  ZG: Download to MIKROE-3191 SPI Flash
+  ZG: Parse & Extract zonal.bin
+  ZG: Write zonal.bin to Bank B
   ZG: Verify
   ZG: Reboot
   ZG: Boot from Bank B ✅
@@ -965,6 +971,367 @@ typedef struct {
 - [ ] 문서 정리
 
 **목표**: 전체 OTA 동작 ✅
+
+---
+
+## 🔄 OTA 구현 우선순위 (MIKROE-3191 통합)
+
+### ⭐ 우선순위 1: Flash Programming (필수)
+**Example**: `Flash_Programming_1_KIT_TC375_LK`
+- **Phase 1: Package Transfer** - PFLASH Bank B 쓰기
+- PSPR 사용하여 Bank A에서 실행하며 Bank B 프로그래밍
+- EndInit Protection 관리
+
+### ⭐ 우선순위 2: MIKROE-3191 SPI Flash Driver (필수) ⭐ NEW!
+**하드웨어**: MIKROE-3191 (Flash 2 Click)
+- **칩**: W25Q128JV (16MB SPI Flash)
+- **인터페이스**: QSPI2 (mikroBUS 소켓)
+- **용도**: Zone Package 임시 버퍼
+- **Phase 1: Package Transfer** - 대용량 zone.bin (10MB) 저장
+
+### ⭐ 우선순위 3: Flash ECC Error Injection (권장)
+**Example**: `iLLD_TC375_ADS_Flash_ECC_Error_Injection`
+- **Phase 2: Readiness Collection** - 무결성 검증
+- Bank B 업데이트 후 ECC 에러 체크
+- Rollback 메커니즘 테스트
+
+### 우선순위 4: MPU Memory Protection (권장)
+**Example**: `MPU_Memory_Protection_1_KIT_TC375_LK`
+- **Phase 0: Secure Boot** - 부트로더 영역 보호
+- Code Execution 제어
+
+### 우선순위 5: BUS Memory Protection (선택)
+**Example**: `iLLD_TC375_ADS_BUS_Memory_Protection_LiteKit`
+- **Phase 1: Package Transfer** - 멀티코어 보호
+- CPU 간 메모리 접근 제어
+
+### 우선순위 6: Overlay (선택)
+**Example**: `iLLD_TC375_ADS_OVERLAY_LITEKIT`
+- **Phase 3: Activation** - 런타임 패치
+
+---
+
+## 🚀 Zonal Gateway OTA 구현 전략 (MIKROE-3191 통합) ⭐ NEW!
+
+### 전체 아키텍처
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                        VMG (Cloud)                             │
+│            zone.bin (10MB) Generation                          │
+│  ┌──────────────────────────────────────────────────────┐     │
+│  │ Header (1KB)                                         │     │
+│  │  - Magic: "ZONE"                                     │     │
+│  │  - Version: 1.0.0                                    │     │
+│  │  - Total Size: 10MB                                  │     │
+│  │  - File Count: 4                                     │     │
+│  │  - CRC32: 0xABCD1234                                 │     │
+│  ├──────────────────────────────────────────────────────┤     │
+│  │ File Table (256B)                                    │     │
+│  │  Entry 1: zonal.bin  @ 0x400  (2MB)                 │     │
+│  │  Entry 2: ecu1.bin   @ 0x200400 (3MB)               │     │
+│  │  Entry 3: ecu2.bin   @ 0x500400 (2.5MB)             │     │
+│  │  Entry 4: ecu3.bin   @ 0x770400 (2.5MB)             │     │
+│  └──────────────────────────────────────────────────────┘     │
+└────────────────────┬───────────────────────────────────────────┘
+                     │ JSON over TCP (Ethernet)
+                     │ zone.bin (10MB chunks)
+                     ▼
+┌────────────────────────────────────────────────────────────────┐
+│              Zonal Gateway (TC375)                             │
+│  ┌──────────────────────────────────────────────────────┐     │
+│  │  Step 1: TCP Download (64KB chunks)                  │     │
+│  │    lwIP → RAM Buffer (64KB)                          │     │
+│  └────────────┬─────────────────────────────────────────┘     │
+│               │                                                │
+│               ▼                                                │
+│  ┌──────────────────────────────────────────────────────┐     │
+│  │  Step 2: MIKROE-3191 (Flash 2 Click)  ⭐ NEW!        │     │
+│  │           W25Q128JV (16MB SPI Flash)                 │     │
+│  │  ┌────────────────────────────────────────────┐     │     │
+│  │  │ zone.bin (10MB)                            │     │     │
+│  │  │  - Address: 0x000000 ~ 0xA00000            │     │     │
+│  │  │  - Write Speed: ~1MB/s (10초)              │     │     │
+│  │  │  - Read Speed: ~10MB/s (1초)               │     │     │
+│  │  └────────────────────────────────────────────┘     │     │
+│  │                                                      │     │
+│  │  Hardware Connection (mikroBUS):                    │     │
+│  │    TC375 QSPI2 ↔ MIKROE-3191                        │     │
+│  │    P15.2 (SCLK)  → CLK                              │     │
+│  │    P15.3 (MTSR)  → DI (MOSI)                        │     │
+│  │    P15.6 (MRST)  ← DO (MISO)                        │     │
+│  │    P15.1 (SLSO0) → CS                               │     │
+│  │    3.3V → VCC, GND → GND                            │     │
+│  └──────────────────────────────────────────────────────┘     │
+│                                                                │
+│  ┌──────────────────────────────────────────────────────┐     │
+│  │  Step 3: Zone Package Parser                         │     │
+│  │    1. Read Header from SPI Flash                     │     │
+│  │    2. Validate Magic & CRC                           │     │
+│  │    3. Parse File Table                               │     │
+│  └────────────┬─────────────────────────────────────────┘     │
+│               │                                                │
+│               ▼                                                │
+│  ┌──────────────────────────────────────────────────────┐     │
+│  │  Step 4: File Extraction & Distribution              │     │
+│  │                                                       │     │
+│  │  4-1. zonal.bin (2MB)                                │     │
+│  │       SPI Flash → RAM (64KB chunks)                  │     │
+│  │              → PFLASH Bank B (0x80340000)            │     │
+│  │                                                       │     │
+│  │  4-2. ecu1.bin (3MB)                                 │     │
+│  │       SPI Flash → RAM (64KB chunks)                  │     │
+│  │              → DoIP/UDS to ECU1                      │     │
+│  │                                                       │     │
+│  │  4-3. ecu2.bin, ecu3.bin                             │     │
+│  │       동일 방식으로 ECU2, ECU3에 전송                 │     │
+│  └──────────────────────────────────────────────────────┘     │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Phase별 상세 전략
+
+#### Phase 0: MIKROE-3191 초기화 (시스템 부팅 시)
+```c
+// QSPI2 + W25Q128JV 초기화
+void OTA_Init(void)
+{
+    // 1. QSPI2 Master 초기화 (mikroBUS)
+    W25Q_Init();  // 10 MHz QSPI
+    
+    // 2. Flash Chip ID 확인
+    uint8 mfr, dev;
+    W25Q_ReadID(&mfr, &dev);
+    // Expected: mfr=0xEF (Winbond), dev=0x17 (W25Q128)
+    
+    // 3. 전체 Erase (선택적, 초기화 시만)
+    // W25Q_EraseChip();  // ~30초 소요
+}
+```
+
+#### Phase 1: Package Transfer (VMG → SPI Flash)
+```c
+// VMG로부터 zone.bin 다운로드
+void OTA_DownloadZonePackage(void)
+{
+    uint8 buffer[65536];  // 64KB RAM 버퍼
+    uint32 spiFlashAddr = 0x000000;
+    uint32 totalSize = 10 * 1024 * 1024;  // 10MB
+    uint32 received = 0;
+    
+    while (received < totalSize)
+    {
+        // 1. VMG로부터 64KB 수신 (TCP)
+        uint32 chunkSize = tcp_receive(buffer, 65536);
+        
+        // 2. SPI Flash에 쓰기 (페이지 단위)
+        for (uint32 i = 0; i < chunkSize; i += 256)
+        {
+            W25Q_WritePage(spiFlashAddr + i, &buffer[i], 256);
+        }
+        
+        spiFlashAddr += chunkSize;
+        received += chunkSize;
+        
+        // 3. 진행률 표시
+        uint8 progress = (received * 100) / totalSize;
+        UART_Printf("OTA Download: %d%%\r\n", progress);
+    }
+    
+    UART_Printf("OTA Download Complete: %d MB\r\n", received / 1024 / 1024);
+}
+```
+
+**성능 분석**:
+- TCP 다운로드: ~10초 (100Mbps Ethernet, 10MB)
+- SPI Flash 쓰기: ~10초 (1MB/s, 10MB)
+- **총 소요시간: ~20초**
+
+#### Phase 2: Readiness Collection (무결성 검증)
+```c
+// Zone Package 검증
+ZonePackageError_t OTA_ValidatePackage(void)
+{
+    // 1. Header 읽기
+    ZonePackageHeader_t header;
+    W25Q_Read(0x000000, (uint8*)&header, sizeof(header));
+    
+    // 2. Magic Number 확인
+    if (header.magic != 0x5A4F4E45)  // "ZONE"
+    {
+        return ZONE_ERR_MAGIC;
+    }
+    
+    // 3. CRC32 검증 (전체 패키지)
+    uint32 calculatedCRC = 0;
+    uint8 buffer[4096];
+    uint32 addr = sizeof(ZonePackageHeader_t);
+    
+    while (addr < header.totalSize)
+    {
+        uint32 readSize = (header.totalSize - addr > 4096) ? 4096 : (header.totalSize - addr);
+        W25Q_Read(addr, buffer, readSize);
+        calculatedCRC = crc32_update(calculatedCRC, buffer, readSize);
+        addr += readSize;
+    }
+    
+    if (calculatedCRC != header.crc32)
+    {
+        return ZONE_ERR_CRC;
+    }
+    
+    return ZONE_OK;
+}
+```
+
+#### Phase 3: Activation (파일 추출 및 배포)
+```c
+// zonal.bin 추출 → PFLASH Bank B
+void OTA_UpdateZonalGateway(void)
+{
+    // 1. File Entry 찾기
+    ZoneFileEntry_t entry;
+    if (ZonePackage_FindFile("ZONAL_GATEWAY", &entry) != ZONE_OK)
+    {
+        return;
+    }
+    
+    // 2. Bank B Erase
+    Flash_EraseBank(BANK_B_START, BANK_B_SIZE);
+    
+    // 3. SPI Flash → PFLASH (64KB 청크 단위)
+    uint8 buffer[65536];
+    uint32 spiFlashAddr = entry.offset;
+    uint32 pflashAddr = BANK_B_START;
+    uint32 remaining = entry.size;
+    
+    while (remaining > 0)
+    {
+        uint32 chunkSize = (remaining > 65536) ? 65536 : remaining;
+        
+        // SPI Flash에서 읽기
+        W25Q_FastRead(spiFlashAddr, buffer, chunkSize);
+        
+        // PFLASH에 쓰기 (32 Byte 페이지 단위)
+        for (uint32 i = 0; i < chunkSize; i += 32)
+        {
+            Flash_WritePage(pflashAddr + i, &buffer[i], 32);
+        }
+        
+        spiFlashAddr += chunkSize;
+        pflashAddr += chunkSize;
+        remaining -= chunkSize;
+    }
+    
+    // 4. 검증
+    uint32 crc = Flash_CalculateCRC(BANK_B_START, entry.size);
+    if (crc == entry.crc32)
+    {
+        // 5. BMHD 업데이트 (Boot to Bank B)
+        Update_BMHD_STAD(BANK_B_START);
+    }
+}
+
+// ECU 펌웨어 스트리밍 전송
+void OTA_UpdateECU(const char* ecuName)
+{
+    // 1. File Entry 찾기
+    ZoneFileEntry_t entry;
+    if (ZonePackage_FindFile(ecuName, &entry) != ZONE_OK)
+    {
+        return;
+    }
+    
+    // 2. DoIP로 스트리밍 전송
+    uint8 buffer[4096];  // 4KB UDS 전송 단위
+    uint32 spiFlashAddr = entry.offset;
+    uint32 remaining = entry.size;
+    
+    // UDS RequestDownload
+    DoIP_UDS_RequestDownload(ecuName, entry.size);
+    
+    while (remaining > 0)
+    {
+        uint32 chunkSize = (remaining > 4096) ? 4096 : remaining;
+        
+        // SPI Flash에서 읽기
+        W25Q_FastRead(spiFlashAddr, buffer, chunkSize);
+        
+        // UDS TransferData
+        DoIP_UDS_TransferData(ecuName, buffer, chunkSize);
+        
+        spiFlashAddr += chunkSize;
+        remaining -= chunkSize;
+    }
+    
+    // UDS RequestTransferExit
+    DoIP_UDS_RequestTransferExit(ecuName);
+}
+```
+
+**메모리 효율**:
+- RAM 사용량: 64KB (버퍼) + 약 20KB (프로토콜 스택) = **~84KB**
+- SPI Flash 사용량: 10MB (zone.bin) / 16MB = **62.5%**
+- PFLASH 사용량: 2MB (zonal.bin) / 2.88MB (Bank B) = **69.4%**
+
+#### Phase 4: Result Report
+```c
+// OTA 결과 보고
+void OTA_ReportResult(void)
+{
+    OTAResult_t result;
+    
+    // 1. Self Test
+    result.zonalGW.status = (Get_Current_Bank() == BANK_B) ? OTA_SUCCESS : OTA_FAILED;
+    result.zonalGW.version = Get_Firmware_Version();
+    
+    // 2. ECU Result 수집
+    for (int i = 0; i < 3; i++)
+    {
+        result.ecu[i].status = DoIP_UDS_ReadDID(ecuNames[i], DID_OTA_STATUS);
+        result.ecu[i].version = DoIP_UDS_ReadDID(ecuNames[i], DID_SW_VERSION);
+    }
+    
+    // 3. VMG로 전송
+    JSON_SendOTAResult(&result);
+}
+```
+
+---
+
+## 💾 MIKROE-3191 상세 사양
+
+### 하드웨어
+| 항목 | 사양 |
+|------|------|
+| **제품명** | MIKROE-3191 (Flash 2 Click) |
+| **Flash 칩** | W25Q128JV (Winbond) |
+| **용량** | 16MB (128 Mbit) |
+| **인터페이스** | SPI (QSPI 호환) |
+| **전원** | 3.3V |
+| **커넥터** | mikroBUS 소켓 |
+| **최대 속도** | 104 MHz (QSPI 모드) |
+
+### 성능
+| 작업 | 속도 | 비고 |
+|------|------|------|
+| **Read** | ~10 MB/s | Fast Read (0x0B) |
+| **Page Program** | ~256 Bytes/1ms | 256 Byte 페이지 |
+| **Sector Erase (4KB)** | ~45 ms | 최소 단위 |
+| **Block Erase (64KB)** | ~150 ms | 권장 단위 |
+| **Chip Erase** | ~30 s | 전체 삭제 |
+
+### 메모리 맵
+```
+W25Q128JV (16MB)
+┌───────────────────────────────────────┐
+│ 0x000000 ~ 0x9FFFFF  Zone Package     │ 10MB
+│                      (10MB)            │
+├───────────────────────────────────────┤
+│ 0xA00000 ~ 0xFFFFFF  Reserved         │ 6MB
+│                      (Future Use)      │
+└───────────────────────────────────────┘
+```
 
 ---
 
