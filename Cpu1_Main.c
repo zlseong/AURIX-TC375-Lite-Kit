@@ -29,7 +29,7 @@
 #include "IfxScuWdt.h"
 #include "Ifx_Cfg_Ssw.h"
 
-extern IfxCpu_syncEvent cpuSyncEvent;
+extern IfxCpu_syncEvent g_cpuSyncEvent;
 
 void core1_main(void)
 {
@@ -41,8 +41,8 @@ void core1_main(void)
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
     
     /* Wait for CPU sync event */
-    IfxCpu_emitEvent(&cpuSyncEvent);
-    IfxCpu_waitEvent(&cpuSyncEvent, 1);
+    IfxCpu_emitEvent(&g_cpuSyncEvent);
+    IfxCpu_waitEvent(&g_cpuSyncEvent, 1);
     
     while(1)
     {
