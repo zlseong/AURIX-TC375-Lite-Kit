@@ -38,7 +38,6 @@ typedef struct
  ******************************************************************************/
 
 static MCU_Flash_Functions g_flashFunctions;
-static SPI_Flash_S25FL512S *g_spi_flash = NULL;
 static boolean g_is_initialized = FALSE;
 
 /* Buffer for reading SPI Flash (page-aligned) */
@@ -151,14 +150,8 @@ static void writePFLASH_impl(uint32 startingAddr, const uint8 *data, uint32 size
  * Public Functions
  ******************************************************************************/
 
-MCU_Flash_Result MCU_Flash_Init(SPI_Flash_S25FL512S *spi_flash)
+MCU_Flash_Result MCU_Flash_Init(void)
 {
-    if (spi_flash == NULL)
-    {
-        return MCU_FLASH_ERROR_INVALID_PARAM;
-    }
-    
-    g_spi_flash = spi_flash;
     g_is_initialized = TRUE;
     
     sendUARTMessage("[MCU PFLASH] Module initialized\r\n", 34);
@@ -235,10 +228,12 @@ MCU_Flash_Result MCU_Flash_CopyFromSPI(uint32 spi_source, uint32 mcu_target, uin
     uint8 *transfer_buffer = NULL;
     MCU_Flash_Result result = MCU_FLASH_OK;
     
-    if (!g_is_initialized || g_spi_flash == NULL)
+    /* External flash not available - skip */
+    /* if (!g_is_initialized || g_spi_flash == NULL)
     {
         return MCU_FLASH_ERROR_INVALID_PARAM;
-    }
+    } */
+    return MCU_FLASH_ERROR_SPI_READ_FAILED;
     
     sendUARTMessage("\r\n[MCU PFLASH] ========================================\r\n", 54);
     sendUARTMessage("[MCU PFLASH] Starting MCU Flash Programming\r\n", 46);
@@ -284,8 +279,8 @@ MCU_Flash_Result MCU_Flash_CopyFromSPI(uint32 spi_source, uint32 mcu_target, uin
         uint32 remaining = size - bytes_copied;
         uint32 to_copy = (remaining < chunk_size) ? remaining : chunk_size;
         
-        /* Read from SPI Flash */
-        SPI_Flash_Result spi_result = SPI_Flash_Read(g_spi_flash, 
+        /* Read from SPI Flash (DISABLED - no external flash support) */
+        /* SPI_Flash_Result spi_result = SPI_Flash_Read(g_spi_flash, 
                                                       spi_source + bytes_copied,
                                                       transfer_buffer,
                                                       to_copy);
@@ -295,7 +290,12 @@ MCU_Flash_Result MCU_Flash_CopyFromSPI(uint32 spi_source, uint32 mcu_target, uin
             free(transfer_buffer);
             sendUARTMessage("[MCU PFLASH] ERROR: SPI Flash read failed!\r\n", 45);
             return MCU_FLASH_ERROR_SPI_READ_FAILED;
-        }
+        } */
+        
+        /* External flash not available - return error */
+        IfxCpu_restoreInterrupts(interruptState);
+        free(transfer_buffer);
+        return MCU_FLASH_ERROR_SPI_READ_FAILED;
         
         /* Write to MCU PFLASH (from PSPR) */
         g_flashFunctions.writeFlash(mcu_target + bytes_copied, transfer_buffer, to_copy);
@@ -319,13 +319,16 @@ MCU_Flash_Result MCU_Flash_CopyFromSPI(uint32 spi_source, uint32 mcu_target, uin
     sendUARTMessage("\r\n[MCU PFLASH] Step 4: Writing metadata...\r\n", 44);
     
     SoftwarePackageHeader metadata;
-    /* Read header from SPI Flash (first 64 bytes) */
-    SPI_Flash_Result spi_result = SPI_Flash_Read(g_spi_flash, spi_source, (uint8*)&metadata, sizeof(metadata));
+    /* Read header from SPI Flash (first 64 bytes) - DISABLED */
+    /* SPI_Flash_Result spi_result = SPI_Flash_Read(g_spi_flash, spi_source, (uint8*)&metadata, sizeof(metadata));
     if (spi_result != FLASH_OK)
     {
         sendUARTMessage("[MCU PFLASH] ERROR: Failed to read metadata from SPI!\r\n", 56);
         return MCU_FLASH_ERROR_SPI_READ_FAILED;
-    }
+    } */
+    
+    /* External flash not available - skip metadata write */
+    return MCU_FLASH_ERROR_SPI_READ_FAILED;
     
     /* Verify metadata magic */
     if (metadata.magic == SW_PKG_MAGIC)

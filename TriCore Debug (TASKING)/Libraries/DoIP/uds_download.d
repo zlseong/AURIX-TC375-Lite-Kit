@@ -22,16 +22,10 @@ uds_download.o :	..\Libraries\DoIP\doip_types.h
 ..\Libraries\DoIP\doip_types.h :
 uds_download.o :	..\Libraries\DoIP\software_package.h
 ..\Libraries\DoIP\software_package.h :
-uds_download.o :	..\Libraries\SPI_Flash\spi_flash_s25fl512s.h
-..\Libraries\SPI_Flash\spi_flash_s25fl512s.h :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Qspi\\SpiMaster\IfxQspi_SpiMaster.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Qspi\\SpiMaster\IfxQspi_SpiMaster.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Cpu\Irq\IfxCpu_Irq.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Cpu\Irq\IfxCpu_Irq.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Cpu\Std\Ifx_Types.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Cpu\Std\Ifx_Types.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Cpu\Std\IfxCpu.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Cpu\Std\IfxCpu.h" :
+uds_download.o :	..\Libraries\DoIP\mcu_flash_programming.h
+..\Libraries\DoIP\mcu_flash_programming.h :
+uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Cpu\\Std\IfxCpu.h"
+"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Cpu\\Std\IfxCpu.h" :
 uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxCpu_cfg.h"
 "C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxCpu_cfg.h" :
 uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxCpu_cfg_TC37x.h"
@@ -66,6 +60,8 @@ uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libr
 "C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxScu_cfg_TC37x.h" :
 uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Service\\CpuGeneric\_Utilities\Ifx_Assert.h"
 "C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Service\\CpuGeneric\_Utilities\Ifx_Assert.h" :
+uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Cpu\Std\Ifx_Types.h"
+"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Cpu\Std\Ifx_Types.h" :
 uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Scu\Std\IfxScuWdt.h"
 "C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Scu\Std\IfxScuWdt.h" :
 uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Scu\Std\IfxScuWdt.asm.h"
@@ -98,46 +94,6 @@ uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libr
 "C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxDmu_reg.h" :
 uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxDmu_regdef.h"
 "C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxDmu_regdef.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Src\Std\IfxSrc.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Src\Std\IfxSrc.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxSrc_cfg.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxSrc_cfg.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxSrc_cfg_TC37x.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxSrc_cfg_TC37x.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Dma\Dma\IfxDma_Dma.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Dma\Dma\IfxDma_Dma.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxDma_cfg.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxDma_cfg.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxDma_cfg_TC37x.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxDma_cfg_TC37x.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Dma\Std\IfxDma.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Dma\Std\IfxDma.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxDma_bf.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxDma_bf.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxDma_reg.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxDma_reg.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxDma_regdef.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxDma_regdef.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Qspi\Std\IfxQspi.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Qspi\Std\IfxQspi.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxQspi_cfg.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxQspi_cfg.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxQspi_cfg_TC37x.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_Impl\IfxQspi_cfg_TC37x.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxQspi_reg.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxQspi_reg.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxQspi_regdef.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\Infra\\Sfr\\TC37x\IfxQspi_regdef.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_PinMap\IfxQspi_PinMap.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_PinMap\IfxQspi_PinMap.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\_PinMap\\TC37x\IfxQspi_PinMap_TC37x_LQFP176.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\_PinMap\\TC37x\IfxQspi_PinMap_TC37x_LQFP176.h" :
-uds_download.o :	..\Libraries\DoIP\mcu_flash_programming.h
-..\Libraries\DoIP\mcu_flash_programming.h :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\SPI_Flash\spi_flash_s25fl512s.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\SPI_Flash\spi_flash_s25fl512s.h" :
-uds_download.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Cpu\\Std\IfxCpu.h"
-"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Cpu\\Std\IfxCpu.h" :
 uds_download.o :	"C:\Infineon\AURIX-Studio-1.10.24\tools\Compilers\Tasking_1.1r8\ctc\include\string.h"
 "C:\Infineon\AURIX-Studio-1.10.24\tools\Compilers\Tasking_1.1r8\ctc\include\string.h" :
 uds_download.o :	"C:\Infineon\AURIX-Studio-1.10.24\tools\Compilers\Tasking_1.1r8\ctc\include\stdio.h"

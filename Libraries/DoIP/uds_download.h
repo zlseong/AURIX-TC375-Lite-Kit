@@ -13,7 +13,7 @@
 #include "Ifx_Types.h"
 #include "uds_handler.h"
 #include "software_package.h"
-#include "../SPI_Flash/spi_flash_s25fl512s.h"
+/* Flash4 driver removed - UDS Download uses MCU PFLASH only */
 
 /*******************************************************************************
  * SPI Flash Staging Areas (Temporary Buffer)
@@ -65,9 +65,9 @@ typedef struct
 
 /**
  * @brief Initialize UDS Download Module
- * @param flash_handle Pointer to initialized SPI Flash handle
+ * @note Flash4 driver removed - uses MCU PFLASH only
  */
-void UDS_Download_Init(SPI_Flash_S25FL512S *flash_handle);
+void UDS_Download_Init(void);
 
 /**
  * @brief Handle 0x34 RequestDownload service

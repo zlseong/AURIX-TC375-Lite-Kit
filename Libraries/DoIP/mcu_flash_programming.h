@@ -18,7 +18,7 @@
 #define MCU_FLASH_PROGRAMMING_H
 
 #include "Ifx_Types.h"
-#include "spi_flash_s25fl512s.h"
+/* Flash4 driver removed - MCU Flash Programming uses direct methods */
 
 /******************************************************************************
  * Constants
@@ -76,10 +76,9 @@ typedef enum
 
 /**
  * @brief Initialize MCU Flash Programming Module
- * @param spi_flash Pointer to initialized SPI Flash handle
  * @return MCU_FLASH_OK if successful
  */
-MCU_Flash_Result MCU_Flash_Init(SPI_Flash_S25FL512S *spi_flash);
+MCU_Flash_Result MCU_Flash_Init(void);
 
 /**
  * @brief Copy software from SPI Flash to MCU PFLASH

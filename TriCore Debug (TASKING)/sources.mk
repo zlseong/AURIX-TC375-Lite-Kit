@@ -47,7 +47,6 @@ Libraries/Infra/Platform/Tricore/Compilers \
 Libraries/Infra/Ssw/TC3xx/Tricore \
 Libraries/OTA \
 Libraries/SPI_Flash \
-Libraries/Service/CpuGeneric/SysSe/Bsp \
 Libraries/UART \
 Libraries/iLLD/TC3xx/Tricore/Asclin/Asc \
 Libraries/iLLD/TC3xx/Tricore/Asclin/Std \

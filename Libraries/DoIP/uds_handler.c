@@ -11,7 +11,9 @@
 #include "uds_download.h"
 #include "doip_types.h"
 #include "doip_client.h"
+#include "UART_Logging.h"
 #include <string.h>
+#include <stdio.h>
 
 /*******************************************************************************
  * External VCI Database (from Cpu0_Main.c)

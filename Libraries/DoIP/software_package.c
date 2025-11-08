@@ -8,17 +8,16 @@
  ******************************************************************************/
 
 #include "software_package.h"
-#include "spi_flash_s25fl512s.h"
 #include "IfxCpu.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-/* External UART function */
-extern void sendUARTMessage(const char *msg, uint32 len);
+/* External UART function (disabled - no external flash) */
+/* extern void sendUARTMessage(const char *msg, uint32 len); */
 
-/* External SPI Flash handle */
-extern SPI_Flash_S25FL512S g_spi_flash;
+/* External SPI Flash handle (disabled - no external flash) */
+/* extern SPI_Flash_S25FL512S g_spi_flash; */
 
 /*******************************************************************************
  * Private Variables
@@ -151,7 +150,8 @@ static boolean write_mcu_bank_marker(uint32 marker)
     
     boolean interruptState = IfxCpu_disableInterrupts();
     
-    SPI_Flash_Result result = SPI_Flash_EraseSector(&g_spi_flash, 0x000FF000);
+    /* External flash not available - disabled */
+    /* SPI_Flash_Result result = SPI_Flash_EraseSector(&g_spi_flash, 0x000FF000);
     if (result != FLASH_OK)
     {
         IfxCpu_restoreInterrupts(interruptState);
@@ -161,7 +161,10 @@ static boolean write_mcu_bank_marker(uint32 marker)
     result = SPI_Flash_Write(&g_spi_flash, 0x000FF000, marker_data, 4);
     IfxCpu_restoreInterrupts(interruptState);
     
-    return (result == FLASH_OK);
+    return (result == FLASH_OK); */
+    
+    IfxCpu_restoreInterrupts(interruptState);
+    return FALSE; /* External flash not available */
 }
 
 /*******************************************************************************

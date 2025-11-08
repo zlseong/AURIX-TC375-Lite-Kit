@@ -31,7 +31,6 @@ RM := rm -rf
 -include Libraries/iLLD/TC3xx/Tricore/Asclin/Std/subdir.mk
 -include Libraries/iLLD/TC3xx/Tricore/Asclin/Asc/subdir.mk
 -include Libraries/UART/subdir.mk
--include Libraries/Service/CpuGeneric/SysSe/Bsp/subdir.mk
 -include Libraries/SPI_Flash/subdir.mk
 -include Libraries/OTA/subdir.mk
 -include Libraries/Infra/Ssw/TC3xx/Tricore/subdir.mk

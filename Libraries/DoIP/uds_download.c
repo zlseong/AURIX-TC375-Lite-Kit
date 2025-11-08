@@ -23,9 +23,6 @@ extern void sendUARTMessage(const char *msg, uint32 len);
  * Private Variables
  ******************************************************************************/
 
-/* Flash handle (set by Init) */
-static SPI_Flash_S25FL512S *g_flash_handle = NULL;
-
 /* Download session state */
 static UDS_DownloadSession g_download_session = {0};
 
@@ -52,141 +49,55 @@ static boolean MCU_PFLASH_CopyFromSPI(uint32 spi_source, uint32 mcu_target, uint
 }
 
 /**
- * @brief Erase flash area for download
- * @param start_address Flash start address
- * @param size Size to erase (rounded up to block size)
- * @return TRUE if successful, FALSE otherwise
+ * @brief Erase flash area for download (DISABLED - MCU PFLASH only)
+ * @return TRUE (stub)
  */
 static boolean Flash_EraseArea(uint32 start_address, uint32 size)
 {
-    if (g_flash_handle == NULL)
-    {
-        return FALSE;
-    }
-    
     char msg[128];
-    sprintf(msg, "[UDS Download] Erasing Flash: 0x%08X, Size: %u KB\r\n", 
+    sprintf(msg, "[UDS Download] Flash erase (DISABLED): 0x%08X, Size: %u KB\r\n", 
             start_address, size / 1024);
     sendUARTMessage(msg, strlen(msg));
-    
-    /* Calculate number of blocks to erase (256KB each) */
-    uint32 blocks_to_erase = (size + FLASH_ERASE_BLOCK_SIZE - 1) / FLASH_ERASE_BLOCK_SIZE;
-    
-    /* Erase each block */
-    for (uint32 i = 0; i < blocks_to_erase; i++)
-    {
-        uint32 block_address = start_address + (i * FLASH_ERASE_BLOCK_SIZE);
-        
-        sprintf(msg, "  Erasing block %u/%u at 0x%08X...\r\n", 
-                i + 1, blocks_to_erase, block_address);
-        sendUARTMessage(msg, strlen(msg));
-        
-        /* Protect against interrupts during erase (~1 second operation) */
-        boolean interruptState = IfxCpu_disableInterrupts();
-        
-        SPI_Flash_Result result = SPI_Flash_EraseSector(g_flash_handle, block_address);
-        
-        IfxCpu_restoreInterrupts(interruptState);
-        
-        if (result != FLASH_OK)
-        {
-            sprintf(msg, "  ERROR: Erase failed! (Code: %d)\r\n", result);
-            sendUARTMessage(msg, strlen(msg));
-            return FALSE;
-        }
-    }
-    
-    sendUARTMessage("[UDS Download] Flash erase complete!\r\n", 39);
     return TRUE;
 }
 
 /**
- * @brief Write data to flash
- * @param address Flash address
- * @param data Data buffer
- * @param length Data length
- * @return TRUE if successful, FALSE otherwise
+ * @brief Write data to flash (DISABLED - MCU PFLASH only)
+ * @return TRUE (stub)
  */
 static boolean Flash_WriteData(uint32 address, const uint8 *data, uint32 length)
 {
-    if (g_flash_handle == NULL || data == NULL || length == 0)
+    if (data == NULL || length == 0)
     {
         return FALSE;
     }
-    
-    /* Protect against interrupts during QSPI communication */
-    boolean interruptState = IfxCpu_disableInterrupts();
-    
-    SPI_Flash_Result result = SPI_Flash_Write(g_flash_handle, address, data, length);
-    
-    IfxCpu_restoreInterrupts(interruptState);
-    
-    if (result != FLASH_OK)
-    {
-        char msg[128];
-        sprintf(msg, "[UDS Download] ERROR: Flash write failed at 0x%08X (Code: %d)\r\n", 
-                address, result);
-        sendUARTMessage(msg, strlen(msg));
-        return FALSE;
-    }
-    
     return TRUE;
 }
 
 /**
- * @brief Verify written data
- * @param address Flash address
- * @param expected_data Expected data buffer
- * @param length Data length
- * @return TRUE if match, FALSE if mismatch
+ * @brief Verify written data (DISABLED - MCU PFLASH only)
+ * @return TRUE (stub)
  */
 static boolean Flash_VerifyData(uint32 address, const uint8 *expected_data, uint32 length)
 {
-    if (g_flash_handle == NULL || expected_data == NULL || length == 0)
+    if (expected_data == NULL || length == 0)
     {
         return FALSE;
     }
-    
-    /* Allocate read buffer */
-    uint8 *read_buffer = (uint8 *)malloc(length);
-    if (read_buffer == NULL)
-    {
-        sendUARTMessage("[UDS Download] ERROR: Memory allocation failed for verify\r\n", 59);
-        return FALSE;
-    }
-    
-    /* Read back from flash */
-    SPI_Flash_Result result = SPI_Flash_Read(g_flash_handle, address, read_buffer, length);
-    
-    if (result != FLASH_OK)
-    {
-        char msg[128];
-        sprintf(msg, "[UDS Download] ERROR: Flash read failed at 0x%08X (Code: %d)\r\n", 
-                address, result);
-        sendUARTMessage(msg, strlen(msg));
-        free(read_buffer);
-        return FALSE;
-    }
-    
-    /* Compare data */
-    boolean match = (memcmp(read_buffer, expected_data, length) == 0);
-    
-    free(read_buffer);
-    return match;
+    return TRUE;
 }
 
 /*******************************************************************************
  * Public Functions
  ******************************************************************************/
 
-void UDS_Download_Init(SPI_Flash_S25FL512S *flash_handle)
+void UDS_Download_Init(void)
 {
-    g_flash_handle = flash_handle;
     memset(&g_download_session, 0, sizeof(UDS_DownloadSession));
     g_download_session.state = DOWNLOAD_STATE_IDLE;
     
     /* Initialize MCU Flash Programming module */
-    MCU_Flash_Init(flash_handle);
+    MCU_Flash_Init();
     
     sendUARTMessage("[UDS Download] Module initialized with MCU PFLASH support\r\n", 60);
 }
@@ -716,4 +627,5 @@ boolean UDS_Download_RouteToZoneECU(uint16 target_ecu_id, uint32 spi_flash_addre
     /* 임시: 성공 반환 (실제 라우팅 구현 필요) */
     return TRUE;
 }
+
 

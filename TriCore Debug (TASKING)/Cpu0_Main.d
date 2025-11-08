@@ -408,8 +408,10 @@ Cpu0_Main.o :	..\Libraries\DoIP\uds_handler.h
 ..\Libraries\DoIP\uds_handler.h :
 Cpu0_Main.o :	..\Libraries\DoIP\software_package.h
 ..\Libraries\DoIP\software_package.h :
-Cpu0_Main.o :	..\Libraries\SPI_Flash\spi_flash_s25fl512s.h
-..\Libraries\SPI_Flash\spi_flash_s25fl512s.h :
+Cpu0_Main.o :	..\Libraries\DoIP\software_package.h
+..\Libraries\DoIP\software_package.h :
+Cpu0_Main.o :	..\Libraries\SPI_Flash\Flash4_Driver.h
+..\Libraries\SPI_Flash\Flash4_Driver.h :
 Cpu0_Main.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Qspi\\SpiMaster\IfxQspi_SpiMaster.h"
 "C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Qspi\\SpiMaster\IfxQspi_SpiMaster.h" :
 Cpu0_Main.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\Cpu\Irq\IfxCpu_Irq.h"
@@ -442,10 +444,10 @@ Cpu0_Main.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Librari
 "C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\_PinMap\IfxQspi_PinMap.h" :
 Cpu0_Main.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\_PinMap\\TC37x\IfxQspi_PinMap_TC37x_LQFP176.h"
 "C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\_PinMap\\TC37x\IfxQspi_PinMap_TC37x_LQFP176.h" :
-Cpu0_Main.o :	..\Libraries\DoIP\software_package.h
-..\Libraries\DoIP\software_package.h :
-Cpu0_Main.o :	..\Libraries\SPI_Flash\spi_flash_s25fl512s.h
-..\Libraries\SPI_Flash\spi_flash_s25fl512s.h :
+Cpu0_Main.o :	"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Port\\Std\IfxPort.h"
+"C:\\Users\\user\\AURIX-v1.10.24-workspace\\Zonal_Gateway\\Libraries\\iLLD\\TC3xx\\Tricore\\Port\\Std\IfxPort.h" :
+Cpu0_Main.o :	..\Libraries\SPI_Flash\Flash4_Config.h
+..\Libraries\SPI_Flash\Flash4_Config.h :
 Cpu0_Main.o :	"C:\Infineon\AURIX-Studio-1.10.24\tools\Compilers\Tasking_1.1r8\ctc\include\string.h"
 "C:\Infineon\AURIX-Studio-1.10.24\tools\Compilers\Tasking_1.1r8\ctc\include\string.h" :
 Cpu0_Main.o :	"C:\Infineon\AURIX-Studio-1.10.24\tools\Compilers\Tasking_1.1r8\ctc\include\stdio.h"
