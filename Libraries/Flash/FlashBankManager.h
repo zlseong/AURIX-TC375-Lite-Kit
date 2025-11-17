@@ -2,19 +2,29 @@
  * \file FlashBankManager.h
  * \copyright Copyright (C) Infineon Technologies AG 2019
  * 
- * Flash Bank Manager for TC375 Dual-Bank OTA Update
+ * Flash Bank Manager for TC375 Dual-Bank OTA Update with Dual Bootloaders
  * 
  * TC375 PFlash Configuration:
- *   - PFlash0 (Bank A): 0xA000_0000 - 0xA02F_FFFF (3MB) - Application Bank A
- *   - PFlash1 (Bank B): 0xA030_0000 - 0xA05F_FFFF (3MB) - Application Bank B
- *   - Total: 6MB (2 banks × 3MB each)
+ *   - PFlash0 (Bank A): 0xA000_0000 - 0xA02F_FFFF (3MB)
+ *     ├─ Bootloader A:  0xA000_0000 - 0xA000_FFFF (64KB)
+ *     └─ Application A: 0xA001_0000 - 0xA02F_FFFF (2.94MB)
  * 
- * Usage:
+ *   - PFlash1 (Bank B): 0xA030_0000 - 0xA05F_FFFF (3MB)
+ *     ├─ Bootloader B:  0xA030_0000 - 0xA030_FFFF (64KB)
+ *     └─ Application B: 0xA031_0000 - 0xA05F_FFFF (2.94MB)
+ * 
+ * Boot Flow:
+ *   1. BMHD0 → 0x8000_0000 (Bootloader A, fixed)
+ *   2. Bootloader A reads DFlash bootTarget flag
+ *   3. If bootTarget == 0: Jump to Application A (0x8001_0000)
+ *   4. If bootTarget == 1: Jump to Bootloader B (0x8030_0000)
+ *   5. Bootloader B jumps to Application B (0x8031_0000)
+ * 
+ * OTA Update Process:
  *   1. Application downloads firmware to inactive bank
  *   2. Application verifies downloaded firmware (CRC32)
  *   3. Application updates DFlash boot flag and resets
- *   4. Boot validation checks system stability
- *   5. Rollback on failure
+ *   4. Bootloader performs validation and rollback if needed
  *********************************************************************************************************************/
 
 #ifndef FLASH_BANK_MANAGER_H_
@@ -23,23 +33,56 @@
 #include "Ifx_Types.h"
 
 /*******************************************************************************
- * Flash Bank Memory Map (TC375)
+ * Flash Bank Memory Map (TC375) - Dual Bootloader Architecture
  ******************************************************************************/
 
-/* PFlash Bank A (3MB) */
+/* Bootloader Size (64KB per bank) */
+#define BOOTLOADER_SIZE             0x00010000  /* 64KB */
+
+/* Bank A (3MB Total) */
 #define PFLASH_BANK_A_START         0xA0000000
 #define PFLASH_BANK_A_SIZE          0x00300000  /* 3MB */
 #define PFLASH_BANK_A_END           (PFLASH_BANK_A_START + PFLASH_BANK_A_SIZE - 1)
 
-/* PFlash Bank B (3MB) */
+/* Bank A - Bootloader A (64KB) */
+#define BOOTLOADER_A_START          0xA0000000
+#define BOOTLOADER_A_SIZE           BOOTLOADER_SIZE
+#define BOOTLOADER_A_END            (BOOTLOADER_A_START + BOOTLOADER_A_SIZE - 1)
+
+/* Bank A - Application A (2.94MB) */
+#define APPLICATION_A_START         0xA0010000
+#define APPLICATION_A_SIZE          (PFLASH_BANK_A_SIZE - BOOTLOADER_SIZE)
+#define APPLICATION_A_END           PFLASH_BANK_A_END
+
+/* Bank B (3MB Total) */
 #define PFLASH_BANK_B_START         0xA0300000
 #define PFLASH_BANK_B_SIZE          0x00300000  /* 3MB */
 #define PFLASH_BANK_B_END           (PFLASH_BANK_B_START + PFLASH_BANK_B_SIZE - 1)
 
-/* Cached access addresses (for execution) */
+/* Bank B - Bootloader B (64KB) */
+#define BOOTLOADER_B_START          0xA0300000
+#define BOOTLOADER_B_SIZE           BOOTLOADER_SIZE
+#define BOOTLOADER_B_END            (BOOTLOADER_B_START + BOOTLOADER_B_SIZE - 1)
+
+/* Bank B - Application B (2.94MB) */
+#define APPLICATION_B_START         0xA0310000
+#define APPLICATION_B_SIZE          (PFLASH_BANK_B_SIZE - BOOTLOADER_SIZE)
+#define APPLICATION_B_END           PFLASH_BANK_B_END
+
+/* Cached Execution Addresses */
 #define PFLASH_CACHED_BASE          0x80000000
-#define PFLASH_BANK_A_CACHED        0x80000000
-#define PFLASH_BANK_B_CACHED        0x80300000
+
+/* Bootloader Cached Addresses */
+#define BOOTLOADER_A_CACHED         0x80000000  /* Entry point (BMHD0 STAD) */
+#define BOOTLOADER_B_CACHED         0x80300000
+
+/* Application Cached Addresses */
+#define APPLICATION_A_CACHED        0x80010000
+#define APPLICATION_B_CACHED        0x80310000
+
+/* Legacy Compatibility (deprecated - use APPLICATION_x_CACHED instead) */
+#define PFLASH_BANK_A_CACHED        APPLICATION_A_CACHED
+#define PFLASH_BANK_B_CACHED        APPLICATION_B_CACHED
 
 /* User Configuration Blocks (UCB) */
 #define UCB_BASE_ADDRESS            0xAF400000

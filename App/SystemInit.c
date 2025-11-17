@@ -19,13 +19,12 @@
 #include "lwip/udp.h"
 #include "lwip/pbuf.h"
 #include "Libraries/DoIP/doip_client.h"
+#include "Libraries/DoIP/doip_link.h"
 #include "Libraries/DoIP/uds_handler.h"
+#include "Libraries/DataCollection/vci_aggregator.h"
+#include "Libraries/DataCollection/readiness_aggregator.h"
+#include "Libraries/OTA/ota_manager.h"
 #include "Flash4_Driver.h"
-#include "Flash4_Test.h"
-#include "TcpEchoServer.h"
-#include "UdpEchoServer.h"
-#include "Libraries/DataCollection/vci_manager.h"
-#include "Libraries/DataCollection/readiness_manager.h"
 #include "Libraries/Flash/FlashBankManager.h"
 #include <string.h>
 #include <stdio.h>
@@ -134,15 +133,53 @@ static void Init_DoIP(void)
     
     UDS_Init();
     sendUARTMessage("[UDS] Handler initialized\r\n", 27);
+    
+    OTA_Init();
+    sendUARTMessage("[OTA] Manager initialized\r\n", 27);
 }
 
 static void Init_VCI(void)
 {
+    BankMetadata_t currentMeta;
+    FlashBank_t currentBank;
+    boolean metadataValid;
+    char sw_version_buf[16];
+    
+    /* 1. Read metadata from currently running bank */
+    currentBank = FlashBank_GetActiveBoot();
+    metadataValid = FlashBank_ReadMetadata(currentBank, &currentMeta);
+    
+    /* 2. Set ECU ID (fixed) */
     memcpy(g_zgw_vci.ecu_id, ZGW_ECU_ID, sizeof(ZGW_ECU_ID));
-    memcpy(g_zgw_vci.sw_version, ZGW_SW_VERSION, sizeof(ZGW_SW_VERSION));
+    
+    /* 3. Set SW Version - Read from Flash Metadata if valid, otherwise use default */
+    if (metadataValid && currentMeta.magic_number == BANK_METADATA_MAGIC)
+    {
+        /* Extract version from metadata (0xAABBCCDD → vAA.BB.CC) */
+        uint32 ver = currentMeta.firmware_version;
+        uint8 major = (ver >> 16) & 0xFF;
+        uint8 minor = (ver >> 8) & 0xFF;
+        uint8 patch = ver & 0xFF;
+        sprintf(sw_version_buf, "v%u.%u.%u", major, minor, patch);
+        memcpy(g_zgw_vci.sw_version, sw_version_buf, strlen(sw_version_buf) + 1);
+    }
+    else
+    {
+        /* Fallback to hardcoded version (simulation/development mode) */
+        memcpy(g_zgw_vci.sw_version, ZGW_SW_VERSION, sizeof(ZGW_SW_VERSION));
+    }
+    
+    /* 4. Set HW Version and Serial Number (fixed - not in metadata) */
     memcpy(g_zgw_vci.hw_version, ZGW_HW_VERSION, sizeof(ZGW_HW_VERSION));
     memcpy(g_zgw_vci.serial_num, ZGW_SERIAL_NUM, sizeof(ZGW_SERIAL_NUM));
     
+    /* 5. Store ZGW's own VCI in g_vci_database[0] */
+    extern DoIP_VCI_Info g_vci_database[];
+    extern uint8 g_zone_ecu_count;
+    memcpy(&g_vci_database[0], &g_zgw_vci, sizeof(DoIP_VCI_Info));
+    g_zone_ecu_count = 1;  /* ZGW is the first entry (Zone ECUs will be added later) */
+    
+    /* 6. Print VCI information */
     sendUARTMessage("\r\n[VCI] Zonal Gateway (ECU_091):\r\n", 34);
     sendUARTMessage("  SW Ver:  ", 11);
     sendUARTMessage(g_zgw_vci.sw_version, strlen(g_zgw_vci.sw_version));
@@ -152,17 +189,27 @@ static void Init_VCI(void)
     sendUARTMessage(g_zgw_vci.serial_num, strlen(g_zgw_vci.serial_num));
     sendUARTMessage("\r\n", 2);
     
-    sendUARTMessage("[VCI] Waiting for Zone ECUs to send VCI (0/", 43);
-    char max_str[4];
-    sprintf(max_str, "%d", MAX_ZONE_ECUS);
-    sendUARTMessage(max_str, strlen(max_str));
-    sendUARTMessage(")...\r\n", 6);
+    /* 7. Initialize VCI Aggregator */
+    if (VCI_Aggregator_Init())
+    {
+        sendUARTMessage("[VCI] Aggregator initialized\r\n", 31);
+    }
+    else
+    {
+        sendUARTMessage("[VCI] Aggregator init failed\r\n", 30);
+    }
 }
 
 static void Init_Readiness(void)
 {
-    Readiness_Init();
-    sendUARTMessage("[Readiness] Manager initialized\r\n", 34);
+    if (Readiness_Aggregator_Init())
+    {
+        sendUARTMessage("[Readiness] Aggregator initialized\r\n", 37);
+    }
+    else
+    {
+        sendUARTMessage("[Readiness] Init failed\r\n", 25);
+    }
 }
 
 static void Init_Health_Database(void)
@@ -189,6 +236,7 @@ static void Init_FlashBankManager(void)
     FlashBank_t activeBank = FlashBank_GetActiveBoot();
     FlashBankStatus_t status = FlashBank_GetStatusFlags();
     ResetType_t resetType = FlashBank_GetResetType();
+    (void)resetType;  /* Unused for now, may be used for diagnostics later */
     
     char log_msg[128];
     sprintf(log_msg, "[FlashBankMgr] Active Bank: %s\r\n", 
@@ -323,11 +371,10 @@ void SystemInit_All(void)
     
     Init_STM_Timer();
     Flash4_Init();
-    Test_Flash4();
+    /* Test_Flash4(); */  /* Disabled: Flash test not needed for production */
     Init_Ethernet();
     
-    tcp_echo_server_init();
-    udp_echo_server_init();
+    /* TCP/UDP Echo servers removed - replaced by DoIP Link and UDP Link */
     
     Wait_PHY_Link();
     Init_DoIP();

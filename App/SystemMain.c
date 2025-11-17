@@ -6,8 +6,9 @@
 #include "SystemMain.h"
 #include "Ifx_Lwip.h"
 #include "Libraries/DoIP/doip_client.h"
-#include "Libraries/DataCollection/vci_manager.h"
-#include "Libraries/DataCollection/readiness_manager.h"
+#include "Libraries/DoIP/doip_link.h"
+#include "Libraries/DataCollection/vci_aggregator.h"
+#include "Libraries/DataCollection/readiness_aggregator.h"
 #include "Libraries/Flash/FlashBankManager.h"
 #include "IfxStm.h"
 
@@ -27,6 +28,10 @@ void SystemMain_Loop(void)
     /* Record boot timestamp for SW Sync delay */
     g_bootTimestamp = IfxStm_getLower(&MODULE_STM0);
     
+    /* Suppress unused variable warnings when SW_SYNC_ENABLED = 0 */
+    (void)g_syncRequested;
+    (void)g_syncCompleted;
+    
     while (1)
     {
         /* Network and DoIP polling */
@@ -34,9 +39,9 @@ void SystemMain_Loop(void)
         Ifx_Lwip_pollReceiveFlags();
         DoIP_Client_Poll();
         
-        /* VCI and Readiness polling */
-        VCI_CheckCollectionTimeout();
-        Readiness_CheckTimeout();
+        /* VCI and Readiness aggregator polling */
+        VCI_Aggregator_Poll();
+        /* Readiness polling done automatically via UDS Client callback */
         
         /* SW Synchronization Background Task (DISABLED) */
 #if SW_SYNC_ENABLED

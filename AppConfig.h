@@ -45,9 +45,9 @@
 
 /* Zonal Gateway Identity */
 #define ZGW_ECU_ID                 "ECU_091"
-#define ZGW_SW_VERSION             "0.0.0"
-#define ZGW_HW_VERSION             "0.0.0"
-#define ZGW_SERIAL_NUM             "091000001"
+#define ZGW_SW_VERSION             "v0.0.0"       /* Initial Development Version */
+#define ZGW_HW_VERSION             "HW_1.0.0"     /* Hardware Version (fixed) */
+#define ZGW_SERIAL_NUM             "ZGW-091-001"  /* Serial Number (unique per device) */
 
 /* Zone ECU Identity */
 #define ZONE_ECU_ID                "ECU_011"

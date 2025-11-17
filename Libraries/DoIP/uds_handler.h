@@ -227,6 +227,30 @@ boolean UDS_Service_ReadDataByIdentifier(const UDS_Request *request, UDS_Respons
 boolean UDS_Service_RoutineControl(const UDS_Request *request, UDS_Response *response);
 
 /**
+ * @brief Handle 0x34 Request Download (OTA)
+ * @param request UDS request
+ * @param response UDS response (output)
+ * @return TRUE if handled, FALSE otherwise
+ */
+boolean UDS_Service_RequestDownload(const UDS_Request *request, UDS_Response *response);
+
+/**
+ * @brief Handle 0x36 Transfer Data (OTA)
+ * @param request UDS request
+ * @param response UDS response (output)
+ * @return TRUE if handled, FALSE otherwise
+ */
+boolean UDS_Service_TransferData(const UDS_Request *request, UDS_Response *response);
+
+/**
+ * @brief Handle 0x37 Request Transfer Exit (OTA)
+ * @param request UDS request
+ * @param response UDS response (output)
+ * @return TRUE if handled, FALSE otherwise
+ */
+boolean UDS_Service_RequestTransferExit(const UDS_Request *request, UDS_Response *response);
+
+/**
  * @brief Read VCI Data for a specific DID
  * @param did Data Identifier
  * @param data Output buffer for DID data
@@ -277,6 +301,46 @@ void UDS_CreateNegativeResponse(const UDS_Request *request, uint8 nrc, UDS_Respo
  * @param response Output response structure
  */
 void UDS_CreatePositiveResponse(const UDS_Request *request, UDS_Response *response);
+
+/*******************************************************************************
+ * UDS CLIENT - ZGW sends requests to Zone ECUs
+ ******************************************************************************/
+
+/**
+ * @brief UDS Client callback for receiving responses
+ * @param ecu_ip ECU IP address
+ * @param response_data UDS response data
+ * @param response_len Length of response data
+ */
+typedef void (*UDS_Client_ResponseCallback)(const char *ecu_ip, uint8 *response_data, uint16 response_len);
+
+/**
+ * @brief Send UDS request to Zone ECU via DoIP
+ * @param ecu_ip Zone ECU IP address
+ * @param uds_request UDS request data (service ID + parameters)
+ * @param request_len Length of UDS request
+ * @param callback Callback for response (can be NULL)
+ * @return TRUE if request sent successfully, FALSE otherwise
+ */
+boolean UDS_Client_SendRequest(const char *ecu_ip, uint8 *uds_request, uint16 request_len, UDS_Client_ResponseCallback callback);
+
+/**
+ * @brief Send 0x22 ReadDataByID request to Zone ECU (VCI)
+ * @param ecu_ip Zone ECU IP address
+ * @param did Data Identifier (e.g., 0xF194 for VCI)
+ * @param callback Callback for response
+ * @return TRUE if request sent successfully, FALSE otherwise
+ */
+boolean UDS_Client_ReadVCI(const char *ecu_ip, uint16 did, UDS_Client_ResponseCallback callback);
+
+/**
+ * @brief Send 0x31 RoutineControl request to Zone ECU (Readiness)
+ * @param ecu_ip Zone ECU IP address
+ * @param routine_id Routine ID (e.g., 0xF003 for readiness)
+ * @param callback Callback for response
+ * @return TRUE if request sent successfully, FALSE otherwise
+ */
+boolean UDS_Client_CheckReadiness(const char *ecu_ip, uint16 routine_id, UDS_Client_ResponseCallback callback);
 
 #endif /* UDS_HANDLER_H */
 
